@@ -1,0 +1,33 @@
+<body>
+  <img id="base_img" crossorigin="annonymous" src="https://thirdlf03.com/mascat.jpeg" />
+  <img id="output_img" src="" />
+  <script type="module">
+    import init, {edit_image} from "./pkg/image_process_wasm.js";
+    
+    function image() {
+      const img = document.getElementById("base_img");
+      let canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+
+      let ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0);
+
+      let data_url = canvas.toDataURL("image/png");
+      const base64 = data_url.match(/base64,(.*)/)?.[1];
+
+      const convert_image = edit_image(base64);
+      const output_image = "data:image/png;base64," + convert_image;
+      document.getElementById("output_img").setAttribute("src", output_image);
+    }
+
+    async function start() {
+      await init()
+      console.log("Init");
+      image();
+    }
+
+    start()
+
+  </script>
+</body>

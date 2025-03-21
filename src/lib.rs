@@ -1,14 +1,20 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+use std::io::Cursor;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+use base64::prelude::*;
+use image::load_from_memory;
+use wasm_bindgen::prelude::*;
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+#[wasm_bindgen]
+pub fn edit_image(base_img: &str) -> String {
+    //base64 to image
+    let img_buffer = BASE64_STANDARD.decode(base_img).unwrap();
+    let mut img = load_from_memory(img_buffer.as_slice()).unwrap();
+
+    //grayscale
+    img = img.grayscale();
+
+    //image to base64
+    let mut buf: Vec<u8> = Vec::new();
+    let _ = img.write_to(&mut Cursor::new(&mut buf), image::ImageFormat::Png);
+    BASE64_STANDARD.encode(&buf)
 }
