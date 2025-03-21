@@ -1,10 +1,32 @@
 <body>
   <img id="base_img" crossorigin="annonymous" src="https://thirdlf03.com/mascat.jpeg" />
   <img id="output_img" src="" />
+  <form id="check">
+    <label><input type="checkbox" name="option" value="gray"> グレイスケール</label><br>
+    <label><input type="checkbox" name="option" value="half"> 画像サイズを半分</label><br>
+    <label><input type="checkbox" name="option" value="r90"> 90度回転</label><br>
+    <label><input type="checkbox" name="option" value="r180">180度回転</label><br>
+        
+    <button type="submit">送信</button>
+  </form>
   <script type="module">
     import init, {edit_image} from "./pkg/image_process_wasm.js";
-    
-    function image() {
+
+    document.addEventListener("DOMContentLoaded", () => {
+     const checkboxes = document.querySelectorAll('input[name="option"]');
+
+      checkboxes.forEach(checkbox => {
+        checkbox.addEventListener("change", function() {
+          checkboxes.forEach(cb => {
+            if (cb !== this) {
+              cb.checked = false;
+            }
+          });
+        });
+      });
+    });
+   
+    function image(select) {
       const img = document.getElementById("base_img");
       let canvas = document.createElement("canvas");
       canvas.width = img.width;
@@ -16,15 +38,27 @@
       let data_url = canvas.toDataURL("image/png");
       const base64 = data_url.match(/base64,(.*)/)?.[1];
 
-      const convert_image = edit_image(base64);
+      const convert_image = edit_image(base64, select);
       const output_image = "data:image/png;base64," + convert_image;
       document.getElementById("output_img").setAttribute("src", output_image);
     }
+    
+    document.getElementById("check").addEventListener("submit", function(event) {
+      event.preventDefault();
+       const option = document.querySelector('input[name="option"]:checked');
+    
+      if (!option) {
+        alert("1つ選択してください");
+        return;
+      }
+
+      const value = option.value;
+      image(value);
+    });
 
     async function start() {
       await init()
       console.log("Init");
-      image();
     }
 
     start()
